@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	kFNVPrime = uint32(16777619)
-	kShard    = uint32(32)
+	kFNVPrime   = uint32(16777619)
+	kShardCount = uint32(32)
 )
 
 type Option func(p *Map)
@@ -25,7 +25,7 @@ func New(opts ...Option) *Map {
 		opt(m)
 	}
 	if m.shard == 0 {
-		m.shard = kShard
+		m.shard = kShardCount
 	}
 
 	m.shards = make([]*shardMap, m.shard)
@@ -136,7 +136,7 @@ func (this *Map) Range(f func(key string, value interface{}) bool) {
 }
 
 func (this *Map) Items() map[string]interface{} {
-	var nMap = make(map[string]interface{})
+	var nMap = make(map[string]interface{}, this.Len())
 	for i := uint32(0); i < this.shard; i++ {
 		var shard = this.shards[i]
 		shard.RLock()
