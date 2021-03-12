@@ -36,7 +36,7 @@ func New(opts ...Option) *Map {
 		opt(m)
 	}
 	if m.hash == nil {
-		m.hash = BKDR
+		m.hash = FNV1
 	}
 	if m.shard == 0 {
 		m.shard = kShardCount
