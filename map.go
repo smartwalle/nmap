@@ -7,7 +7,6 @@ import (
 )
 
 const (
-	kFNVPrime   = uint32(16777619)
 	kShardCount = uint32(32)
 )
 
@@ -19,10 +18,25 @@ func WithShardCount(count uint32) Option {
 	}
 }
 
+func WithFNVHash() Option {
+	return func(m *Map) {
+		m.hash = FNV1
+	}
+}
+
+func WithBKDRHash() Option {
+	return func(m *Map) {
+		m.hash = BKDR
+	}
+}
+
 func New(opts ...Option) *Map {
 	var m = &Map{}
 	for _, opt := range opts {
 		opt(m)
+	}
+	if m.hash == nil {
+		m.hash = BKDR
 	}
 	if m.shard == 0 {
 		m.shard = kShardCount
@@ -36,6 +50,7 @@ func New(opts ...Option) *Map {
 }
 
 type Map struct {
+	hash   Hash
 	shard  uint32
 	shards []*shardMap
 }
@@ -46,7 +61,7 @@ type shardMap struct {
 }
 
 func (this *Map) getShard(key string) *shardMap {
-	var index = fnv1(key) % this.shard
+	var index = this.hash(key) % this.shard
 	return this.shards[index]
 }
 
@@ -159,13 +174,4 @@ func (this *Map) Keys() []string {
 		shard.RUnlock()
 	}
 	return nKeys
-}
-
-func fnv1(key string) uint32 {
-	var hash = uint32(2166136261)
-	for i := 0; i < len(key); i++ {
-		hash *= kFNVPrime
-		hash ^= uint32(key[i])
-	}
-	return hash
 }
