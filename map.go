@@ -142,9 +142,11 @@ func (this *Map) Range(f func(key string, value interface{}) bool) {
 		var shard = this.shards[i]
 		shard.RLock()
 		for k, v := range shard.items {
+			shard.RUnlock()
 			if f(k, v) == false {
 				return
 			}
+			shard.RLock()
 		}
 		shard.RUnlock()
 	}
