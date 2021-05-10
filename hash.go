@@ -9,7 +9,8 @@ const (
 
 func FNV1(key string) uint32 {
 	var hash = uint32(2166136261)
-	for i := 0; i < len(key); i++ {
+	var keyLen = len(key)
+	for i := 0; i < keyLen; i++ {
 		hash *= kFNVPrime
 		hash ^= uint32(key[i])
 	}
@@ -18,7 +19,8 @@ func FNV1(key string) uint32 {
 
 func BKDR(key string) uint32 {
 	var hash uint32 = 0
-	for i := 0; i < len(key); i++ {
+	var keyLen = len(key)
+	for i := 0; i < keyLen; i++ {
 		hash *= kBKDRSeed
 		hash += uint32(key[i])
 	}
