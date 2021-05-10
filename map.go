@@ -72,7 +72,7 @@ func (this *Map) Set(key string, value interface{}) {
 	shard.Unlock()
 }
 
-func (this *Map) SetNX(key string, value interface{}) {
+func (this *Map) SetNx(key string, value interface{}) {
 	var shard = this.getShard(key)
 	shard.Lock()
 	var _, ok = shard.items[key]
