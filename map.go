@@ -3,6 +3,7 @@ package nmap
 // 参考 https://github.com/orcaman/concurrent-map
 
 import (
+	"math/rand"
 	"sync"
 )
 
@@ -20,13 +21,22 @@ func WithShardCount(count uint32) Option {
 
 func WithFNVHash() Option {
 	return func(m *Map) {
+		m.hashSeed = kFNVSeed
 		m.hash = FNV1
 	}
 }
 
 func WithBKDRHash() Option {
 	return func(m *Map) {
+		m.hashSeed = kBKDRSeed
 		m.hash = BKDR
+	}
+}
+
+func WithDJBHash() Option {
+	return func(m *Map) {
+		m.hashSeed = rand.Uint32()
+		m.hash = DJB
 	}
 }
 
@@ -36,7 +46,7 @@ func New(opts ...Option) *Map {
 		opt(m)
 	}
 	if m.hash == nil {
-		m.hash = FNV1
+		WithFNVHash()(m)
 	}
 	if m.shard == 0 {
 		m.shard = kShardCount
@@ -50,9 +60,10 @@ func New(opts ...Option) *Map {
 }
 
 type Map struct {
-	hash   Hash
-	shard  uint32
-	shards []*shardMap
+	hashSeed uint32
+	hash     Hash
+	shard    uint32
+	shards   []*shardMap
 }
 
 type shardMap struct {
@@ -61,7 +72,7 @@ type shardMap struct {
 }
 
 func (this *Map) getShard(key string) *shardMap {
-	var index = this.hash(key) % this.shard
+	var index = this.hash(this.hashSeed, key) % this.shard
 	return this.shards[index]
 }
 
