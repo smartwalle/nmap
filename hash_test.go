@@ -24,6 +24,6 @@ func BenchmarkDJB(b *testing.B) {
 	b.ResetTimer()
 	var seed = rand.Uint32()
 	for i := 0; i < b.N; i++ {
-		BKDR(seed, "有中文"+strconv.Itoa(i))
+		DJB(seed, "有中文"+strconv.Itoa(i))
 	}
 }
