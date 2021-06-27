@@ -77,6 +77,44 @@ func BenchmarkSyncMap_Get(b *testing.B) {
 	}
 }
 
+func BenchmarkMapFNV_GetSet(b *testing.B) {
+	var m = nmap.New(nmap.WithFNVHash())
+	b.ResetTimer()
+	go set(m, b)
+	get(m, b)
+}
+
+func BenchmarkMap_GetSet(b *testing.B) {
+	var m = make(map[string]string)
+	var mu = sync.RWMutex{}
+	b.ResetTimer()
+	go func() {
+		for i := 0; i < b.N; i++ {
+			mu.Lock()
+			m["sss"+strconv.Itoa(i)] = "hello"
+			mu.Unlock()
+		}
+	}()
+
+	for i := 0; i < b.N; i++ {
+		mu.RLock()
+		_ = m["sss"+strconv.Itoa(i)]
+		mu.RUnlock()
+	}
+}
+
+func BenchmarkSyncMap_GetSet(b *testing.B) {
+	var m = &sync.Map{}
+	go func() {
+		for i := 0; i < b.N; i++ {
+			m.Store("sss"+strconv.Itoa(i), "hello")
+		}
+	}()
+	for i := 0; i < b.N; i++ {
+		m.Load("sss" + strconv.Itoa(i))
+	}
+}
+
 func BenchmarkMap_Range(b *testing.B) {
 	var m = nmap.New()
 	for i := 0; i < 1000; i++ {
