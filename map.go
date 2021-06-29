@@ -89,6 +89,7 @@ func (this *Map) SetNx(key string, value interface{}) bool {
 	var _, ok = shard.items[key]
 	if ok == false {
 		shard.items[key] = value
+		shard.Unlock()
 		return true
 	}
 	shard.Unlock()
