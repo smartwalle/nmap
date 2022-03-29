@@ -10,26 +10,26 @@ import (
 	"time"
 )
 
-func set(m *nmap.Map, b *testing.B) {
+func set(m *nmap.Map[string], b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		m.Set("sss"+strconv.Itoa(i), "hello")
 	}
 }
 
 func BenchmarkMapFNV_Set(b *testing.B) {
-	var m = nmap.New(nmap.WithFNVHash())
+	var m = nmap.New[string](nmap.WithFNVHash())
 	b.ResetTimer()
 	set(m, b)
 }
 
 func BenchmarkMapBKDR_Set(b *testing.B) {
-	var m = nmap.New(nmap.WithBKDRHash())
+	var m = nmap.New[string](nmap.WithBKDRHash())
 	b.ResetTimer()
 	set(m, b)
 }
 
 func BenchmarkMapDJB_Set(b *testing.B) {
-	var m = nmap.New(nmap.WithDJBHash())
+	var m = nmap.New[string](nmap.WithDJBHash())
 	b.ResetTimer()
 	set(m, b)
 }
@@ -42,28 +42,28 @@ func BenchmarkSyncMap_Set(b *testing.B) {
 	}
 }
 
-func get(m *nmap.Map, b *testing.B) {
+func get(m *nmap.Map[string], b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		m.Get("sss" + strconv.Itoa(i))
 	}
 }
 
 func BenchmarkMapFNV_Get(b *testing.B) {
-	var m = nmap.New(nmap.WithFNVHash())
+	var m = nmap.New[string](nmap.WithFNVHash())
 	set(m, b)
 	b.ResetTimer()
 	get(m, b)
 }
 
 func BenchmarkMapBKDR_Get(b *testing.B) {
-	var m = nmap.New(nmap.WithBKDRHash())
+	var m = nmap.New[string](nmap.WithBKDRHash())
 	set(m, b)
 	b.ResetTimer()
 	get(m, b)
 }
 
 func BenchmarkMapDJB_Get(b *testing.B) {
-	var m = nmap.New(nmap.WithDJBHash())
+	var m = nmap.New[string](nmap.WithDJBHash())
 	set(m, b)
 	b.ResetTimer()
 	get(m, b)
@@ -81,7 +81,14 @@ func BenchmarkSyncMap_Get(b *testing.B) {
 }
 
 func BenchmarkMapFNV_GetSet(b *testing.B) {
-	var m = nmap.New(nmap.WithFNVHash())
+	var m = nmap.New[string](nmap.WithFNVHash())
+	b.ResetTimer()
+	go set(m, b)
+	get(m, b)
+}
+
+func BenchmarkMapDJB_GetSet(b *testing.B) {
+	var m = nmap.New[string](nmap.WithDJBHash())
 	b.ResetTimer()
 	go set(m, b)
 	get(m, b)
@@ -118,15 +125,15 @@ func BenchmarkSyncMap_GetSet(b *testing.B) {
 	}
 }
 
-func BenchmarkMap_Range(b *testing.B) {
-	var m = nmap.New()
+func BenchmarkDJB_Range(b *testing.B) {
+	var m = nmap.New[string](nmap.WithDJBHash())
 	for i := 0; i < 1000; i++ {
 		m.Set(strconv.Itoa(i), "hello")
 	}
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		m.Range(func(key string, value interface{}) bool {
+		m.Range(func(key string, value string) bool {
 			return true
 		})
 	}
@@ -199,7 +206,7 @@ func TestMap_GC_IP(t *testing.T) {
 }
 
 func TestNMap_GC_SV(t *testing.T) {
-	var m = nmap.New()
+	var m = nmap.New[int32]()
 	for i := 0; i < N; i++ {
 		n := int32(i)
 		m.Set(fmt.Sprintf("%d", n), n)
@@ -210,7 +217,7 @@ func TestNMap_GC_SV(t *testing.T) {
 }
 
 func TestNMap_GC_SP(t *testing.T) {
-	var m = nmap.New()
+	var m = nmap.New[*int32]()
 	for i := 0; i < N; i++ {
 		n := int32(i)
 		m.Set(fmt.Sprintf("%d", n), &n)
