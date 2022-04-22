@@ -53,7 +53,7 @@ type Map[T any] struct {
 
 type shardMap[T any] struct {
 	*sync.RWMutex
-	items map[string]T
+	elements map[string]T
 }
 
 func New[T any](opts ...Option) *Map[T] {
@@ -61,7 +61,9 @@ func New[T any](opts ...Option) *Map[T] {
 	m.option = &option{}
 
 	for _, opt := range opts {
-		opt(m.option)
+		if opt != nil {
+			opt(m.option)
+		}
 	}
 	if m.hash == nil {
 		WithDJBHash()(m.option)
@@ -72,7 +74,7 @@ func New[T any](opts ...Option) *Map[T] {
 
 	m.shards = make([]*shardMap[T], m.shard)
 	for i := uint32(0); i < m.shard; i++ {
-		m.shards[i] = &shardMap[T]{RWMutex: &sync.RWMutex{}, items: make(map[string]T)}
+		m.shards[i] = &shardMap[T]{RWMutex: &sync.RWMutex{}, elements: make(map[string]T)}
 	}
 	return m
 }
@@ -85,16 +87,16 @@ func (this *Map[T]) getShard(key string) *shardMap[T] {
 func (this *Map[T]) Set(key string, value T) {
 	var shard = this.getShard(key)
 	shard.Lock()
-	shard.items[key] = value
+	shard.elements[key] = value
 	shard.Unlock()
 }
 
 func (this *Map[T]) SetNx(key string, value T) bool {
 	var shard = this.getShard(key)
 	shard.Lock()
-	var _, ok = shard.items[key]
+	var _, ok = shard.elements[key]
 	if ok == false {
-		shard.items[key] = value
+		shard.elements[key] = value
 		shard.Unlock()
 		return true
 	}
@@ -105,7 +107,7 @@ func (this *Map[T]) SetNx(key string, value T) bool {
 func (this *Map[T]) Get(key string) (T, bool) {
 	var shard = this.getShard(key)
 	shard.RLock()
-	var value, ok = shard.items[key]
+	var value, ok = shard.elements[key]
 	shard.RUnlock()
 	return value, ok
 }
@@ -113,7 +115,7 @@ func (this *Map[T]) Get(key string) (T, bool) {
 func (this *Map[T]) Exists(key string) bool {
 	var shard = this.getShard(key)
 	shard.RLock()
-	var _, ok = shard.items[key]
+	var _, ok = shard.elements[key]
 	shard.RUnlock()
 	return ok
 }
@@ -122,7 +124,7 @@ func (this *Map[T]) RemoveAll() {
 	for i := uint32(0); i < this.shard; i++ {
 		var shard = this.shards[i]
 		shard.Lock()
-		shard.items = make(map[string]T)
+		shard.elements = make(map[string]T)
 		shard.Unlock()
 	}
 }
@@ -130,15 +132,15 @@ func (this *Map[T]) RemoveAll() {
 func (this *Map[T]) Remove(key string) {
 	var shard = this.getShard(key)
 	shard.Lock()
-	delete(shard.items, key)
+	delete(shard.elements, key)
 	shard.Unlock()
 }
 
 func (this *Map[T]) Pop(key string) (T, bool) {
 	var shard = this.getShard(key)
 	shard.Lock()
-	var value, ok = shard.items[key]
-	delete(shard.items, key)
+	var value, ok = shard.elements[key]
+	delete(shard.elements, key)
 	shard.Unlock()
 	return value, ok
 }
@@ -148,7 +150,7 @@ func (this *Map[T]) Len() int {
 	for i := uint32(0); i < this.shard; i++ {
 		var shard = this.shards[i]
 		shard.RLock()
-		count += len(shard.items)
+		count += len(shard.elements)
 		shard.RUnlock()
 	}
 	return count
@@ -161,7 +163,7 @@ func (this *Map[T]) Range(f func(key string, value T) bool) {
 	for i := uint32(0); i < this.shard; i++ {
 		var shard = this.shards[i]
 		shard.RLock()
-		for k, v := range shard.items {
+		for k, v := range shard.elements {
 			shard.RUnlock()
 			if f(k, v) == false {
 				return
@@ -172,12 +174,12 @@ func (this *Map[T]) Range(f func(key string, value T) bool) {
 	}
 }
 
-func (this *Map[T]) Items() map[string]T {
+func (this *Map[T]) Elements() map[string]T {
 	var nMap = make(map[string]T, this.Len())
 	for i := uint32(0); i < this.shard; i++ {
 		var shard = this.shards[i]
 		shard.RLock()
-		for k, v := range shard.items {
+		for k, v := range shard.elements {
 			nMap[k] = v
 		}
 		shard.RUnlock()
@@ -190,7 +192,7 @@ func (this *Map[T]) Keys() []string {
 	for i := uint32(0); i < this.shard; i++ {
 		var shard = this.shards[i]
 		shard.RLock()
-		for k := range shard.items {
+		for k := range shard.elements {
 			nKeys = append(nKeys, k)
 		}
 		shard.RUnlock()
