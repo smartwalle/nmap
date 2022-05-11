@@ -42,6 +42,18 @@ func BenchmarkSyncMap_Set(b *testing.B) {
 	}
 }
 
+func BenchmarkMap_Set(b *testing.B) {
+	var m = make(map[string]string)
+	var mu = sync.RWMutex{}
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		mu.Lock()
+		m["sss"+strconv.Itoa(i)] = "hello"
+		mu.Unlock()
+	}
+}
+
 func get(m *nmap.Map[string], b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		m.Get("sss" + strconv.Itoa(i))
