@@ -11,43 +11,43 @@ const (
 	kShardCount = uint32(32)
 )
 
-type Option func(opt *option)
+type Option func(opt *options)
 
 func WithShardCount(count uint32) Option {
-	return func(opt *option) {
+	return func(opt *options) {
 		opt.shard = count
 	}
 }
 
 func WithFNVHash() Option {
-	return func(opt *option) {
-		opt.hashSeed = kFNVSeed
-		opt.hash = FNV1
+	return func(opts *options) {
+		opts.hashSeed = kFNVSeed
+		opts.hash = FNV1
 	}
 }
 
 func WithBKDRHash() Option {
-	return func(opt *option) {
-		opt.hashSeed = kBKDRSeed
-		opt.hash = BKDR
+	return func(opts *options) {
+		opts.hashSeed = kBKDRSeed
+		opts.hash = BKDR
 	}
 }
 
 func WithDJBHash() Option {
-	return func(opt *option) {
-		opt.hashSeed = rand.Uint32()
-		opt.hash = DJB
+	return func(opts *options) {
+		opts.hashSeed = rand.Uint32()
+		opts.hash = DJB
 	}
 }
 
-type option struct {
+type options struct {
 	hashSeed uint32
 	hash     Hash
 	shard    uint32
 }
 
 type Map[T any] struct {
-	*option
+	*options
 	shards []*shardMap[T]
 }
 
@@ -58,15 +58,15 @@ type shardMap[T any] struct {
 
 func New[T any](opts ...Option) *Map[T] {
 	var m = &Map[T]{}
-	m.option = &option{}
+	m.options = &options{}
 
 	for _, opt := range opts {
 		if opt != nil {
-			opt(m.option)
+			opt(m.options)
 		}
 	}
 	if m.hash == nil {
-		WithDJBHash()(m.option)
+		WithDJBHash()(m.options)
 	}
 	if m.shard == 0 {
 		m.shard = kShardCount
