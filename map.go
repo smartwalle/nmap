@@ -41,8 +41,8 @@ func WithDJBHash() Option {
 }
 
 type options struct {
-	hashSeed uint32
 	hash     Hash
+	hashSeed uint32
 	shard    uint32
 }
 
