@@ -52,8 +52,8 @@ type Map[T any] struct {
 }
 
 type shardMap[T any] struct {
-	*sync.RWMutex
 	elements map[string]T
+	sync.RWMutex
 }
 
 func New[T any](opts ...Option) *Map[T] {
@@ -74,7 +74,7 @@ func New[T any](opts ...Option) *Map[T] {
 
 	m.shards = make([]*shardMap[T], m.shard)
 	for i := uint32(0); i < m.shard; i++ {
-		m.shards[i] = &shardMap[T]{RWMutex: &sync.RWMutex{}, elements: make(map[string]T)}
+		m.shards[i] = &shardMap[T]{elements: make(map[string]T)}
 	}
 	return m
 }
