@@ -180,7 +180,7 @@ func TestMap_GC_SV(t *testing.T) {
 		m[fmt.Sprintf("%d", n)] = n
 	}
 	runtime.GC()
-	fmt.Printf("With map[string]int32, GC took %s\n", TimeGC())
+	t.Logf("With map[string]int32, GC took %s\n", TimeGC())
 	_ = m["0"]
 }
 
@@ -191,7 +191,7 @@ func TestMap_GC_SP(t *testing.T) {
 		m[fmt.Sprintf("%d", n)] = &n
 	}
 	runtime.GC()
-	fmt.Printf("With map[string]*int32, GC took %s\n", TimeGC())
+	t.Logf("With map[string]*int32, GC took %s\n", TimeGC())
 	_ = m["0"]
 }
 
@@ -202,7 +202,7 @@ func TestMap_GC_IV(t *testing.T) {
 		m[n] = n
 	}
 	runtime.GC()
-	fmt.Printf("With map[int32]int32, GC took %s\n", TimeGC())
+	t.Logf("With map[int32]int32, GC took %s\n", TimeGC())
 	_ = m[0]
 }
 
@@ -213,7 +213,7 @@ func TestMap_GC_IP(t *testing.T) {
 		m[n] = &n
 	}
 	runtime.GC()
-	fmt.Printf("With map[int32]*int32, GC took %s\n", TimeGC())
+	t.Logf("With map[int32]*int32, GC took %s\n", TimeGC())
 	_ = m[0]
 }
 
@@ -224,7 +224,7 @@ func TestNMap_GC_SV(t *testing.T) {
 		m.Set(fmt.Sprintf("%d", n), n)
 	}
 	runtime.GC()
-	fmt.Printf("With nmap[string]int32, GC took %s\n", TimeGC())
+	t.Logf("With nmap[string]int32, GC took %s\n", TimeGC())
 	_, _ = m.Get("0")
 }
 
@@ -235,6 +235,6 @@ func TestNMap_GC_SP(t *testing.T) {
 		m.Set(fmt.Sprintf("%d", n), &n)
 	}
 	runtime.GC()
-	fmt.Printf("With nmap[string]*int32, GC took %s\n", TimeGC())
+	t.Logf("With nmap[string]*int32, GC took %s\n", TimeGC())
 	_, _ = m.Get("0")
 }
