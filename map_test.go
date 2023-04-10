@@ -222,7 +222,6 @@ func TestStdMap_GC_SV(t *testing.T) {
 		n := int32(i)
 		m[fmt.Sprintf("%d", n)] = n
 	}
-	runtime.GC()
 	t.Logf("With %T, GC took %s\n", m, TimeGC())
 	_ = m["0"]
 }
@@ -233,7 +232,6 @@ func TestStdMap_GC_SP(t *testing.T) {
 		n := int32(i)
 		m[fmt.Sprintf("%d", n)] = &n
 	}
-	runtime.GC()
 	t.Logf("With %T, GC took %s\n", m, TimeGC())
 	_ = m["0"]
 }
@@ -244,7 +242,6 @@ func TestStdMap_GC_IV(t *testing.T) {
 		n := int32(i)
 		m[n] = n
 	}
-	runtime.GC()
 	t.Logf("With %T, GC took %s\n", m, TimeGC())
 	_ = m[0]
 }
@@ -255,7 +252,6 @@ func TestStdMap_GC_IP(t *testing.T) {
 		n := int32(i)
 		m[n] = &n
 	}
-	runtime.GC()
 	t.Logf("With %T, GC took %s\n", m, TimeGC())
 	_ = m[0]
 }
@@ -266,7 +262,6 @@ func TestMap_GC_SV(t *testing.T) {
 		n := int32(i)
 		m.Set(fmt.Sprintf("%d", n), n)
 	}
-	runtime.GC()
 	t.Logf("With %T, GC took %s\n", m, TimeGC())
 	_, _ = m.Get("0")
 }
@@ -277,7 +272,6 @@ func TestMap_GC_SP(t *testing.T) {
 		n := int32(i)
 		m.Set(fmt.Sprintf("%d", n), &n)
 	}
-	runtime.GC()
 	t.Logf("With %T, GC took %s  \n", m, TimeGC())
 	_, _ = m.Get("0")
 }
@@ -290,7 +284,6 @@ func TestMap_GC_IV(t *testing.T) {
 		n := int32(i)
 		m.Set(n, n)
 	}
-	runtime.GC()
 	t.Logf("With %T, GC took %s\n", m, TimeGC())
 	_, _ = m.Get(0)
 }
@@ -303,7 +296,6 @@ func TestMap_GC_IP(t *testing.T) {
 		n := int32(i)
 		m.Set(n, &n)
 	}
-	runtime.GC()
 	t.Logf("With %T, GC took %s\n", m, TimeGC())
 	_, _ = m.Get(0)
 }
