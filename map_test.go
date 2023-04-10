@@ -60,7 +60,7 @@ func BenchmarkMap_SetIntInt(b *testing.B) {
 	}
 }
 
-func BenchmarkMapDJB_SetIntString(b *testing.B) {
+func BenchmarkMap_SetIntString(b *testing.B) {
 	var m = nmap.NewMap[int, string](func(key int) uint32 {
 		return uint32(key % nmap.ShardCount)
 	})
