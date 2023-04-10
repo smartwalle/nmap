@@ -55,8 +55,8 @@ func (this *Map[K, V]) Set(key K, value V) {
 func (this *Map[K, V]) SetNx(key K, value V) bool {
 	var shard = this.getShard(key)
 	shard.Lock()
-	var _, ok = shard.elements[key]
-	if ok == false {
+	var _, found = shard.elements[key]
+	if !found {
 		shard.elements[key] = value
 		shard.Unlock()
 		return true
@@ -91,19 +91,18 @@ func (this *Map[K, V]) RemoveAll() {
 }
 
 func (this *Map[K, V]) Remove(key K) {
-	var shard = this.getShard(key)
-	shard.Lock()
-	delete(shard.elements, key)
-	shard.Unlock()
+	this.Pop(key)
 }
 
 func (this *Map[K, V]) Pop(key K) (V, bool) {
 	var shard = this.getShard(key)
 	shard.Lock()
-	var value, ok = shard.elements[key]
-	delete(shard.elements, key)
+	var value, found = shard.elements[key]
+	if found {
+		delete(shard.elements, key)
+	}
 	shard.Unlock()
-	return value, ok
+	return value, found
 }
 
 func (this *Map[K, V]) Len() int {
@@ -126,7 +125,7 @@ func (this *Map[K, V]) Range(f func(key K, value V) bool) {
 		shard.RLock()
 		for k, v := range shard.elements {
 			shard.RUnlock()
-			if f(k, v) == false {
+			if !f(k, v) {
 				return
 			}
 			shard.RLock()
