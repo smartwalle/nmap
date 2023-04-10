@@ -7,25 +7,25 @@ import (
 )
 
 func BenchmarkFNV1(b *testing.B) {
-	var hash = nmap.FNV1()
+	var sharding = nmap.FNV1Sharding()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		hash("有中文" + strconv.Itoa(i))
+		sharding("有中文" + strconv.Itoa(i))
 	}
 }
 
 func BenchmarkBKDR(b *testing.B) {
-	var hash = nmap.BKDR()
+	var sharding = nmap.BKDRSharding()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		hash("有中文" + strconv.Itoa(i))
+		sharding("有中文" + strconv.Itoa(i))
 	}
 }
 
 func BenchmarkDJB(b *testing.B) {
-	var hash = nmap.DJB()
+	var sharding = nmap.DJBSharding()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		hash("有中文" + strconv.Itoa(i))
+		sharding("有中文" + strconv.Itoa(i))
 	}
 }
